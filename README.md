@@ -5,20 +5,20 @@ Este repositorio documenta un proyecto de **MLOps** enfocado en la **detección 
 
 ---
 
-## 🎯 Fases del Proyecto
+##  Fases del Proyecto
 
-### **Fase 1: Experimentación (Notebooks)**
+### **Fase 1: Experimentación**
 
 Etapa completamente implementada en **Jupyter Notebooks**, donde se desarrolla el análisis exploratorio, la ingeniería de características y el modelado.
 
-### **Fase 2: Productivización (Pipelines MLOps)**
+### **Fase 2: Productivización**
 
 Propuesta de arquitectura para llevar los modelos a producción mediante **Kubeflow Pipelines**, integrando buenas prácticas de MLOps.
 Actualmente se encuentra definida como **diseño arquitectónico**, pendiente de implementación.
 
 ---
 
-## 📊 Fase 1: Experimentación - COMPLETA ✅
+##  Fase 1: Experimentación - COMPLETA
 
 ### Descripción del Problema
 
@@ -26,7 +26,7 @@ Sistema para detectar la **ocupación de una habitación** utilizando mediciones
 
 * **Variables**: Temperatura (°C), CO₂ (ppm), Humedad relativa (%), Luz (lux)
 * **Objetivo**: Predecir ocupación binaria (0 = desocupada, 1 = ocupada)
-* **Datos**: 8 días de mediciones continuas provenientes de sensores
+* **Datos**: 7 días de mediciones
 
 ### Estructura de Directorios - Fase 1
 
@@ -67,7 +67,7 @@ notebooks/
 
 ---
 
-## 🚀 Fase 2: Productivización - PROPUESTA DE ARQUITECTURA
+##  Fase 2: Productivización - PROPUESTA DE ARQUITECTURA
 
 ### Estado Actual
 
@@ -108,7 +108,7 @@ BigQuery → GCS → Preprocesamiento → Entrenamiento → Validación → Desp
 
 ---
 
-## 🧱 Estructura de Directorios - Fase 2
+## Estructura de Directorios - Fase 2
 
 ```
 src/
@@ -137,7 +137,7 @@ src/
 
 ---
 
-## 🧪 Estructura de Tests
+##  Estructura de Tests
 
 ```
 tests/
@@ -153,11 +153,11 @@ tests/
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 **Experimentación**
 
-* Python 3.8+
+* Python 3.10+
 * Jupyter
 * Pandas / NumPy
 * Scikit-learn

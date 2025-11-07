@@ -1,0 +1,50 @@
+# Configuración específica para entorno de producción
+# Este archivo contiene overrides para el entorno prod
+
+# Infraestructura
+infrastructure:
+  bucket_name: "mlops-prod-bucket"
+  environment: "prod"
+
+# Pipeline - configuración robusta para producción
+pipeline:
+  operational:
+    log_level: "WARNING"
+    email_notifications: true
+    email_addresses: ["prod-alerts@company.com", "ml-team@company.com"]
+    timeout_minutes: 120
+    retry_count: 5
+
+  deployment:
+    min_replica_count: 2
+    max_replica_count: 10
+    machine_type: "n1-standard-8"  # Más recursos en prod
+
+# Componentes - configuraciones más robustas para producción
+components:
+  create_dataset:
+    timeout_seconds: 600  # 10 minutos
+
+  train_model:
+    validation_split: 0.3  # Más datos para validación en prod
+    early_stopping: true
+
+  validate_model:
+    confusion_matrix: true
+    classification_report: true
+
+  deploy_model:
+    enable_monitoring: true
+    monitoring_config:
+      drift_detection: true
+      performance_threshold: 0.85  # Umbral más estricto
+
+# Logging más conservador en producción
+logging:
+  level: "WARNING"
+
+monitoring:
+  enable: true
+  alert_thresholds:
+    accuracy_drop: 0.03  # Umbral más estricto
+    latency_increase: 50

@@ -1,0 +1,36 @@
+# Configuración específica para entorno de desarrollo
+# Este archivo contiene overrides para el entorno dev
+
+# Infraestructura
+infrastructure:
+  bucket_name: "mlops-dev-bucket"
+  environment: "dev"
+
+# Pipeline - configuración más ligera para desarrollo
+pipeline:
+  operational:
+    log_level: "DEBUG"
+    email_notifications: false
+    timeout_minutes: 30
+
+  deployment:
+    min_replica_count: 1
+    max_replica_count: 1
+
+# Componentes - configuraciones más rápidas para desarrollo
+components:
+  create_dataset:
+    timeout_seconds: 60
+
+  train_model:
+    validation_split: 0.1  # Menos datos para validación en dev
+
+  deploy_model:
+    enable_monitoring: false
+
+# Logging más verboso en desarrollo
+logging:
+  level: "DEBUG"
+
+monitoring:
+  enable: false

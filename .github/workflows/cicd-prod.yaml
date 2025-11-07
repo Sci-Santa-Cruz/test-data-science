@@ -1,0 +1,106 @@
+name: CICD Prod
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+  id-token: write
+
+env:
+  _BUCKET: ${{ secrets.BUCKET }}
+  _ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  _PIPELINE_REPO: ${{ secrets.PIPELINE_REPO }}
+
+jobs:
+  ci:
+    permissions: write-all
+    name: Check code quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v6.6.0
+        env:
+          VALIDATE_PYTHON: true
+          VALIDATE_PYTHON_BLACK: true
+          VALIDATE_PYTHON_FLAKE8: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    needs: [ci]
+    name: Integration Tests
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 'Check Pipeline: Train'
+        uses: dorny/paths-filter@v2.2.1
+        id: train-pipeline
+        with:
+            filters: |
+                src:
+                  - 'src/pipelines/pipelines/train/**'
+
+      - name: 'Compile Pipeline: Beans'
+        if: steps.pipeline-train.outputs.src == 'true'
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          python3 -B src/pipelines/pipelines/train/train_pipeline.py --compile
+
+
+  cd:
+    needs: [ci, test]
+    permissions: write-all
+    name: Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 'GCP Auth'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          project_id: ''
+          workload_identity_provider: ''
+          service_account: ''
+
+      - name: 'Check Vertex Pipeline: Train'
+        uses: dorny/paths-filter@v2.2.1
+        id: train-pipeline
+        with:
+            filters: |
+                src:
+                  - 'src/pipelines/pipelines/train/**'
+
+      - name: 'Check Cloud Function: Train'
+        uses: dorny/paths-filter@v2.2.1
+        id: cloud-function-train
+        with:
+            filters: |
+                src:
+                  - 'cloud-functions/train/**'
+
+      - name: 'Submit Vertex: Train'
+        if: steps.pipeline-train.outputs.src == 'true'
+        run: gcloud builds submit . --config cloud-build/pipeline.yaml --substitutions _BUCKET=${{ secrets.BUCKET }},_ENVIRONMENT=prod,_PIPELINE_REPO=${{ secrets.PIPELINE_REPO }},_PIPELINE=train
+
+      - name: 'Submit Cloud Function: Train'
+        if: steps.cloud-function.outputs.src == 'true'
+        run: gcloud beta builds submit . --config cloud-build/cloud-function.yaml --substitutions _PIPELINE=train,_LOCATION=us-central1

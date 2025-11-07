@@ -1,0 +1,124 @@
+# Configuración base del pipeline MLOps
+# Este archivo contiene la configuración común para todos los entornos
+
+# Información del proyecto
+project:
+  name: "mlops-pipeline"
+  version: "1.0.0"  # Versión base - se incrementa automáticamente al registrar
+  description: "Pipeline de MLOps completo con Kubeflow y Vertex AI"
+
+# Infraestructura y nube
+infrastructure:
+  project_id: "my-gcp-project"
+  location: "us-central1"
+  bucket_name: "mlops-bucket"
+  environment: "dev"
+  region: "us-central1"
+
+# Configuración del pipeline
+pipeline:
+  # Dataset y modelo
+  dataset_name: "iris"
+  model_version: "v1.0"
+  dataset_version: "v1.0"
+
+  # Rutas de archivos (con placeholders para interpolación)
+  paths:
+    raw_dataset: "data/raw/{dataset_name}_{dataset_version}.csv"
+    train_dataset: "data/processed/{dataset_name}_train_{dataset_version}.csv"
+    test_dataset: "data/processed/{dataset_name}_test_{dataset_version}.csv"
+    model: "models/{dataset_name}_model_{model_version}.joblib"
+    metrics: "metrics/{dataset_name}_train_metrics_{model_version}.csv"
+
+  # Configuración del modelo
+  model:
+    type: "LogisticRegression"
+    hyperparameters:
+      epochs: 100
+      learning_rate: 0.01
+      test_size: 0.2
+      random_state: 42
+      max_iter: 1000
+      stratify: true
+
+  # Configuración de despliegue
+  deployment:
+    display_name_model: "{dataset_name}-model-{model_version}"
+    display_name_endpoint: "{dataset_name}-endpoint-{model_version}"
+    machine_type: "n1-standard-4"
+    min_replica_count: 1
+    max_replica_count: 3
+    traffic_split: 100
+    enable_monitoring: true
+
+  # Configuración operacional
+  operational:
+    force_retrain: false
+    retry_count: 3
+    log_level: "INFO"
+    email_notifications: true
+    email_addresses: ["mlops@example.com"]
+    timeout_minutes: 60
+
+# Configuraciones específicas por componente
+components:
+  create_dataset:
+    query: "SELECT * FROM `bigquery-public-data.ml_datasets.iris`"
+    timeout_seconds: 300
+
+  split_dataset:
+    stratify: true
+    test_size: 0.2
+    random_state: 42
+
+  train_model:
+    validation_split: 0.2
+    early_stopping: false
+    save_best_only: true
+    metrics: ["accuracy", "precision", "recall", "f1_score", "auc_roc"]
+
+  validate_model:
+    metrics: ["accuracy", "precision", "recall", "f1_score"]
+    confusion_matrix: true
+    classification_report: true
+
+  deploy_model:
+    traffic_split: 100
+    enable_monitoring: true
+    monitoring_config:
+      drift_detection: true
+      performance_threshold: 0.8
+
+# Configuración de utilidades
+utils:
+  data_validation:
+    min_rows: 10
+    required_columns: ["Class"]
+    allow_nulls: false
+
+  data_splitting:
+    default_test_size: 0.2
+    default_random_state: 42
+    stratify_by_target: true
+    target_column: "Class"
+
+# Configuración de logging y monitoreo
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/pipeline.log"
+
+monitoring:
+  enable: true
+  metrics_endpoint: "https://monitoring.googleapis.com/v3"
+  alert_thresholds:
+    accuracy_drop: 0.05
+    latency_increase: 100
+
+# Configuración de versionado automático
+versioning:
+  auto_increment: true
+  increment_pattern: "0.0.1"  # Patrón de incremento: major.minor.patch
+  base_version: "0.0.1"  # Versión inicial si no existe en config
+  max_attempts: 100  # Máximo número de intentos para encontrar versión disponible
+    latency_increase: 100

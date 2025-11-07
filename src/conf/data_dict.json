@@ -1,0 +1,56 @@
+{
+  "id": {
+    "nombre": "room_id",
+    "descripcion": "Identificador único de la habitación (llave primaria).",
+    "tipo": "int",
+    "formato": null
+  },
+  "id2": {
+    "nombre": "room_id_duplicate",
+    "descripcion": "Repetición del identificador único de la habitación.",
+    "tipo": "int",
+    "formato": null
+  },
+  "v1": {
+    "nombre": "light_lux",
+    "descripcion": "Nivel de iluminación medido en lux.",
+    "tipo": "float",
+    "formato": null
+  },
+  "v2": {
+    "nombre": "temperature_celsius",
+    "descripcion": "Temperatura ambiente en grados centígrados.",
+    "tipo": "float",
+    "formato": null
+  },
+  "v3": {
+    "nombre": "timestamp",
+    "descripcion": "Fecha y hora en que fueron tomadas las mediciones.",
+    "tipo": "datetime",
+    "formato": "yyyy-MM-dd HH:mm:ss"
+  },
+  "v4": {
+    "nombre": "co2_ppm",
+    "descripcion": "Concentración de dióxido de carbono (CO2) en partes por millón (ppm).",
+    "tipo": "float",
+    "formato": null
+  },
+  "v5": {
+    "nombre": "humidity_percent",
+    "descripcion": "Humedad relativa del ambiente en porcentaje.",
+    "tipo": "float",
+    "formato": null
+  },
+  "v6": {
+    "nombre": "humidity_ratio",
+    "descripcion": "Cociente de humedad calculado a partir de la temperatura y humedad relativa (kg agua-vapor / kg aire).",
+    "tipo": "float",
+    "formato": null
+  },
+  "c1": {
+    "nombre": "class",
+    "descripcion": "Variable binaria que indica ocupación del cuarto (0 = No ocupado, 1 = Ocupado).",
+    "tipo": "int",
+    "formato": null
+  }
+}

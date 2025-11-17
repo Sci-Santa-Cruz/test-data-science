@@ -346,89 +346,83 @@ import math
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
+import pandas as pd
+import math
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-def plot_scatter_matrix_by_day(
-    df,
-    x_col,
-    y_col,
-    class_col='class',
-    hover_col='timestamp',
-    cols=2,
-    marker_size=8
-):
+def plot_variable_vs_hour_matrix(df, y_col, class_col='class', cols=2, marker_size=8):
     """
-    Muestra todos los días en una matriz de subplots.
-    X vs Y, colores consistentes por clase.
-    Hover muestra el contenido de hover_col.
+    Matriz de subplots: cualquier variable vs hora del día para cada día.
+    Colores consistentes por clase.
+    Hover muestra hora:minuto:segundo.
     
     Parámetros:
     - df: DataFrame con los datos.
-    - x_col, y_col: columnas a graficar en los ejes.
-    - class_col: columna que indica la clase.
-    - hover_col: columna que se mostrará al pasar el mouse.
+    - y_col: columna que se graficará en el eje Y.
+    - class_col: columna que indica la clase (default 'class').
     - cols: cantidad de subplots por fila.
     - marker_size: tamaño de los marcadores.
     """
-    
+
     df = df.copy()
     df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
     df['day'] = df['timestamp'].dt.date
-    df['hover_text'] = df[hover_col].astype(str)
-    
+    df['hour_num'] = df['timestamp'].dt.hour
+    df['hour_str'] = df['timestamp'].dt.strftime('%H:%M:%S')
+
     unique_days = sorted(df['day'].dropna().unique())
     classes = sorted(df[class_col].unique())
     n_days = len(unique_days)
-    
+
+    # Asignar colores consistentes a clases
     color_map = {c: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
                  for i, c in enumerate(classes)}
-    
+
     rows = math.ceil(n_days / cols)
     fig = make_subplots(
         rows=rows,
         cols=cols,
         subplot_titles=[str(d) for d in unique_days]
     )
-    
+
     for i, day in enumerate(unique_days):
         df_day = df[df['day'] == day]
         row = (i // cols) + 1
         col = (i % cols) + 1
+
         for c in classes:
             df_class = df_day[df_day[class_col] == c]
             if not df_class.empty:
-                hovertemplate = (
-                    '%{text}<br>' +
-                    x_col + ': %{x}<br>' +
-                    y_col + ': %{y}<br>' +
-                    'Clase: ' + str(c)
-                )
                 fig.add_trace(
                     go.Scatter(
-                        x=df_class[x_col],
+                        x=df_class['hour_num'],
                         y=df_class[y_col],
                         mode='markers',
-                        marker=dict(size=marker_size, color=color_map[c], line=dict(width=0.5, color='DarkSlateGrey')),
+                        marker=dict(size=marker_size, color=color_map[c],
+                                    line=dict(width=0.5, color='DarkSlateGrey')),
                         name=f'Clase {c}',
                         legendgroup=str(c),
                         showlegend=(i==0),
-                        text=df_class['hover_text'],
-                        hovertemplate=hovertemplate
+                        text=df_class['hour_str'],
+                        hovertemplate=f'Hora: %{{text}}<br>{y_col}: %{{y:.2f}}<br>Clase: %{{marker.color}}'
                     ),
                     row=row,
                     col=col
                 )
-    
+
     fig.update_layout(
         height=400*rows,
         width=1300,
-        title_text=f'{y_col} vs {x_col} – Todos los días',
+        title_text=f'{y_col} vs Hora – Todos los días',
         title_x=0.5,
         legend_title="Clase",
         hovermode='closest'
     )
-    
+
     for i in range(n_days):
-        fig.update_xaxes(title_text=x_col, row=(i//cols)+1, col=(i%cols)+1)
+        fig.update_xaxes(title_text="Hora del día", row=(i//cols)+1, col=(i%cols)+1)
         fig.update_yaxes(title_text=y_col, row=(i//cols)+1, col=(i%cols)+1)
-    
+
     fig.show()
